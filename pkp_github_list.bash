@@ -4,6 +4,7 @@ DIR=./log
 TIMESTAMP=$(date -d "today" +"%Y%m%d%H%M")
 LOGBASE=${DIR}/list_${TIMESTAMP}_pkp_ojs
 OUTPUT=${DIR}/pkp_github_list_${DATE}_confirmed.urls
+PARALLEL=5
 
 mkdir -p ${DIR}
 
@@ -22,7 +23,7 @@ wget --output-document=- -q https://raw.githubusercontent.com/pkp/ojsstats/maste
 	sed '/oai$/! s#\(?.*\)\?$#/oai#' | \
 	tee ${LOGBASE}_2.log \
 	| sort --unique  | sort --random-sort | \
-	parallel --jobs 55555 'wget --no-check-certificate -O  - -q  {}?verb=Identify  --tries=2 --timeout=20 | grep "http://www.openarchives.org/OAI/2.0/" > /dev/null ; if (( 0 == $? )) ; then echo {} ;  else echo  ; fi' | \
+	parallel --jobs ${PARALLEL} 'wget --no-check-certificate -O  - -q  {}?verb=Identify  --tries=2 --timeout=20 | grep "http://www.openarchives.org/OAI/2.0/" > /dev/null ; if (( 0 == $? )) ; then echo {} ;  else echo  ; fi' | \
 	grep '^http' | sort --unique  \
 	> ${OUTPUT}
 
